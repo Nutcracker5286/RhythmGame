@@ -42,15 +42,19 @@
         // 테마 초기화 및 적용
         document.addEventListener('DOMContentLoaded', function() {
             // 저장된 설정 불러오기
-            const settings = JSON.parse(localStorage.getItem('gameSettings')) || {
-                theme: 'warm'
-            };
-
+            const settings = JSON.parse(localStorage.getItem('gameSettings'));
+            
             // 테마 초기화
             const theme = new Theme();
             
-            // 저장된 테마 적용
-            theme.applyTheme(settings.theme);
+            // 저장된 테마가 있으면 적용, 없으면 기본값 사용
+            if (settings && settings.theme) {
+                document.body.className = `theme-${settings.theme}`;
+                theme.applyTheme(settings.theme);
+            } else {
+                document.body.className = 'theme-warm';
+                theme.applyTheme('warm');
+            }
         });
 
         // 노래 선택 함수

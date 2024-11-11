@@ -5,76 +5,100 @@ class Settings {
         this.closeSettings = document.getElementById('closeSettings');
         this.saveSettings = document.getElementById('saveSettings');
         this.resolutionSelect = document.getElementById('resolution');
+        this.themeSelect = document.getElementById('theme');
         this.gameContainer = document.getElementById('gameContainer');
-        this.startScreenColorPrimary = document.getElementById('startScreenColorPrimary');
-        this.startScreenColorSecondary = document.getElementById('startScreenColorSecondary');
-        this.startScreen = document.getElementById('startScreen');
 
         this.initializeEventListeners();
         this.loadCurrentSettings();
     }
 
     initializeEventListeners() {
-        // 설정 모달 열기
-        this.settingsButton.addEventListener('click', () => {
-            this.settingsModal.style.display = 'block';
-            this.loadCurrentSettings();
-        });
+        if (this.settingsButton) {
+            this.settingsButton.addEventListener('click', () => {
+                this.openSettings();
+            });
+        }
 
-        // 설정 모달 닫기
-        this.closeSettings.addEventListener('click', () => {
-            this.settingsModal.style.display = 'none';
-        });
+        if (this.closeSettings) {
+            this.closeSettings.addEventListener('click', () => {
+                this.closeSettingsModal();
+            });
+        }
+
+        if (this.saveSettings) {
+            this.saveSettings.addEventListener('click', () => {
+                this.saveCurrentSettings();
+            });
+        }
 
         // 모달 외부 클릭시 닫기
         window.addEventListener('click', (e) => {
             if (e.target === this.settingsModal) {
-                this.settingsModal.style.display = 'none';
+                this.closeSettingsModal();
             }
         });
+    }
 
-        // 설정 저장
-        this.saveSettings.addEventListener('click', () => this.saveCurrentSettings());
+    openSettings() {
+        if (this.settingsModal) {
+            this.settingsModal.style.display = 'block';
+            this.loadCurrentSettings();
+        }
+    }
+
+    closeSettingsModal() {
+        if (this.settingsModal) {
+            this.settingsModal.style.display = 'none';
+        }
     }
 
     loadCurrentSettings() {
         const settings = JSON.parse(localStorage.getItem('gameSettings')) || {
             resolution: 'fullscreen',
-            theme: 'warm',
-            startScreenColorPrimary: '#2C1810',
-            startScreenColorSecondary: '#FF8C61'
+            theme: 'warm'
         };
 
-        this.resolutionSelect.value = settings.resolution;
-        this.startScreenColorPrimary.value = settings.startScreenColorPrimary;
-        this.startScreenColorSecondary.value = settings.startScreenColorSecondary;
+        // 해상도 설정 적용
+        if (this.resolutionSelect) {
+            this.resolutionSelect.value = settings.resolution;
+        }
 
+        // 테마 설정 적용
+        if (this.themeSelect) {
+            this.themeSelect.value = settings.theme;
+        }
+
+        // 해상도 적용
         this.applyResolution(settings.resolution);
-        this.applyStartScreenColors(
-            settings.startScreenColorPrimary,
-            settings.startScreenColorSecondary
-        );
+
+        // 테마 적용
+        const theme = new Theme();
+        theme.applyTheme(settings.theme);
     }
 
     saveCurrentSettings() {
         const settings = {
-            resolution: this.resolutionSelect.value,
-            theme: document.body.className.replace('theme-', ''),
-            startScreenColorPrimary: this.startScreenColorPrimary.value,
-            startScreenColorSecondary: this.startScreenColorSecondary.value
+            resolution: this.resolutionSelect ? this.resolutionSelect.value : 'fullscreen',
+            theme: this.themeSelect ? this.themeSelect.value : 'warm'
         };
 
-        this.applyResolution(settings.resolution);
-        this.applyStartScreenColors(
-            settings.startScreenColorPrimary,
-            settings.startScreenColorSecondary
-        );
-
+        // 설정을 localStorage에 저장
         localStorage.setItem('gameSettings', JSON.stringify(settings));
-        this.settingsModal.style.display = 'none';
+
+        // 해상도 적용
+        this.applyResolution(settings.resolution);
+
+        // 테마 적용
+        const theme = new Theme();
+        theme.applyTheme(settings.theme);
+
+        // 모달 닫기
+        this.closeSettingsModal();
     }
 
     applyResolution(resolution) {
+        if (!this.gameContainer) return;
+
         if (resolution === 'fullscreen') {
             this.gameContainer.style.width = '100vw';
             this.gameContainer.style.height = '100vh';
@@ -85,13 +109,5 @@ class Settings {
             this.gameContainer.style.height = `${height}px`;
             this.gameContainer.classList.add('windowed');
         }
-    }
-
-    applyStartScreenColors(primary, secondary) {
-        this.startScreen.style.background = `linear-gradient(
-            135deg,
-            ${primary}E6 0%,
-            ${secondary}CC 100%
-        )`;
     }
 } 
