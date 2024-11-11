@@ -8,10 +8,15 @@ class Game {
         this.currentSong = null;
         this.lastCircleTime = 0;
         this.circleSpeed = 3;
+        this.audioManager = new AudioManager();
         
         this.resizeCanvas();
         window.addEventListener('resize', () => this.resizeCanvas());
         this.canvas.addEventListener('click', (e) => this.handleClick(e));
+
+        this.audioManager.setOnBeatCallback(() => {
+            this.createCircle();
+        });
     }
 
     resizeCanvas() {
@@ -20,14 +25,24 @@ class Game {
         this.canvas.height = container.clientHeight;
     }
 
-    startGame(songId) {
+    async startGame(songId) {
+        const loaded = await this.audioManager.loadSong(songId);
+        if (!loaded) {
+            console.error('Failed to load song');
+            return;
+        }
+
         this.isPlaying = true;
         this.score = 0;
         this.circles = [];
         this.currentSong = songId;
         this.updateScore(0);
+        
+        const difficulty = this.audioManager.getDifficulty();
+        this.circleSpeed = 3 + difficulty;
+        
+        this.audioManager.play();
         this.gameLoop();
-        this.playMusic(songId);
     }
 
     createCircle() {
@@ -57,26 +72,64 @@ class Game {
 
     createParticlesForCircle(circle) {
         const particleCount = 40;
-        const colors = ['#FF8C61', '#FFB996', '#FFE4D6', '#FF6B3D', '#FFA07A'];
+        const themeColors = {
+            primary: getComputedStyle(document.documentElement).getPropertyValue('--primary-accent').trim(),
+            text: getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim(),
+            hover: getComputedStyle(document.documentElement).getPropertyValue('--hover-color').trim()
+        };
+
+        const colors = [
+            themeColors.primary,
+            themeColors.hover,
+            themeColors.text,
+            this.adjustColor(themeColors.primary, 20),
+            this.adjustColor(themeColors.primary, -20)
+        ];
+
+        const particles = [];
 
         for (let i = 0; i < particleCount; i++) {
-            const angle = (Math.PI * 2 * i) / particleCount;
-            const speed = Math.random() * 8 + 5;
-            const size = Math.random() * 12 + 6;
-            const color = colors[Math.floor(Math.random() * colors.length)];
-            const shape = Math.random() > 0.5 ? 'triangle' : 'rectangle';
-            
-            const particle = new Particle(
-                circle.x,
-                circle.y,
-                angle,
-                speed,
-                size,
-                color,
-                shape
-            );
-            circle.particles.push(particle);
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.position = 'absolute';
+            particle.style.left = `${circle.x}px`;
+            particle.style.top = `${circle.y}px`;
+            particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            this.canvas.parentElement.appendChild(particle);
+            particles.push(particle);
         }
+
+        anime({
+            targets: particles,
+            translateX: () => anime.random(-150, 150),
+            translateY: () => anime.random(-150, 150),
+            scale: [
+                {value: 1, duration: 100, easing: 'easeOutQuad'},
+                {value: 0, duration: 900, easing: 'easeInQuad'}
+            ],
+            rotate: () => anime.random(-360, 360),
+            opacity: [
+                {value: 1, duration: 100, easing: 'easeOutQuad'},
+                {value: 0, duration: 900, easing: 'easeInQuad'}
+            ],
+            duration: 1000,
+            easing: 'easeOutExpo',
+            complete: () => {
+                particles.forEach(p => p.remove());
+            }
+        });
+    }
+
+    adjustColor(color, amount) {
+        const hex = color.replace('#', '');
+        const r = Math.min(255, Math.max(0, parseInt(hex.substring(0, 2), 16) + amount));
+        const g = Math.min(255, Math.max(0, parseInt(hex.substring(2, 4), 16) + amount));
+        const b = Math.min(255, Math.max(0, parseInt(hex.substring(4, 6), 16) + amount));
+        
+        return `#${[r, g, b].map(x => {
+            const hex = x.toString(16);
+            return hex.length === 1 ? '0' + hex : hex;
+        }).join('')}`;
     }
 
     updateScore(newScore) {
@@ -91,11 +144,9 @@ class Game {
             this.lastCircleTime = currentTime;
         }
 
-        // 원과 파티클 업데이트
         for (let i = this.circles.length - 1; i >= 0; i--) {
             const circle = this.circles[i];
             
-            // 파티클 업데이트
             for (let j = circle.particles.length - 1; j >= 0; j--) {
                 const particle = circle.particles[j];
                 if (!particle.update()) {
@@ -107,7 +158,20 @@ class Game {
 
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.circles.forEach(circle => circle.draw(this.ctx));
+        this.circles.forEach(circle => {
+            if (!circle.shrinking) {
+                const accentColor = getComputedStyle(document.documentElement)
+                    .getPropertyValue('--primary-accent')
+                    .trim();
+                
+                this.ctx.beginPath();
+                this.ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
+                this.ctx.fillStyle = `${accentColor}CC`;
+                this.ctx.fill();
+                this.ctx.strokeStyle = `${accentColor}`;
+                this.ctx.stroke();
+            }
+        });
     }
 
     gameLoop() {
@@ -117,7 +181,19 @@ class Game {
         requestAnimationFrame(() => this.gameLoop());
     }
 
-    playMusic(songId) {
-        // 음악 재생 로직 구현 예정
+    pause() {
+        this.isPlaying = false;
+        this.audioManager.pause();
+    }
+
+    resume() {
+        this.isPlaying = true;
+        this.audioManager.resume();
+        this.gameLoop();
+    }
+
+    stop() {
+        this.isPlaying = false;
+        this.audioManager.stop();
     }
 } 

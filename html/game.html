@@ -25,9 +25,11 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     <script src="../scripts/ui/Theme.js"></script>
     <script src="../scripts/game/Circle.js"></script>
     <script src="../scripts/game/Particle.js"></script>
+    <script src="../scripts/game/Audio.js"></script>
     <script src="../scripts/game/Game.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -51,15 +53,14 @@
 
             // 일시정지 버튼
             pauseButton.addEventListener('click', () => {
-                game.isPlaying = false;
+                game.pause();
                 pauseMenu.style.display = 'flex';
             });
 
             // 계속하기 버튼
             resumeButton.addEventListener('click', () => {
                 pauseMenu.style.display = 'none';
-                game.isPlaying = true;
-                game.gameLoop();
+                game.resume();
             });
 
             // 다시시작 버튼
@@ -70,11 +71,13 @@
 
             // 노래 선택 버튼
             songSelectButton.addEventListener('click', () => {
+                game.stop();
                 window.location.href = 'song-select.html';
             });
 
             // 메인 메뉴 버튼
             mainMenuButton.addEventListener('click', () => {
+                game.stop();
                 window.location.href = '../index.html';
             });
 

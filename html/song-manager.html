@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>음원 관리 - 리듬 게임</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/game.css">
+    <link rel="stylesheet" href="../styles/themes.css">
+    <link rel="stylesheet" href="../styles/modal.css">
+    <style>
+        .song-manager {
+            width: 80%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1100;
+            background: var(--primary-bg);
+            border-radius: 15px;
+        }
+
+        .song-upload {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .song-list {
+            max-height: none;
+            overflow: visible;
+        }
+
+        .song-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin-bottom: 10px;
+        }
+
+        .song-info {
+            flex-grow: 1;
+            margin-right: 20px;
+        }
+
+        .song-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-color);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            position: relative;
+            z-index: 1;
+        }
+
+        .bpm-detector {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .form-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .form-buttons button {
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+        }
+
+        .button {
+            position: relative;
+            z-index: 1;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+
+        .song-manager * {
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    <div id="gameContainer">
+        <div class="song-manager">
+            <h2>음원 관리</h2>
+            <div class="song-upload">
+                <h3>새 음원 추가</h3>
+                <form id="songUploadForm">
+                    <div class="form-group">
+                        <label for="songFile">음악 파일</label>
+                        <input type="file" id="songFile" accept="audio/*" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="songTitle">제목</label>
+                        <input type="text" id="songTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="songBpm">BPM</label>
+                        <input type="number" id="songBpm" required>
+                        <div class="bpm-detector">
+                            <button type="button" class="button" id="detectBpm">BPM 자동 감지</button>
+                            <span>또는 스페이스바를 눌러 직접 측정</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="songDifficulty">난이도 (1-5)</label>
+                        <input type="number" id="songDifficulty" min="1" max="5" required>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="submit" class="button">추가하기</button>
+                        <button type="button" class="button" onclick="location.href='song-select.html'">닫기</button>
+                    </div>
+                </form>
+            </div>
+            <div class="song-list">
+                <!-- 추가된 음원 목록이 여기에 표시됩니다 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="../scripts/ui/Theme.js"></script>
+    <script src="../scripts/game/SongManager.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const theme = new Theme();
+            const songManager = new SongManager();
+            const overlay = document.getElementById('overlay');
+            const songManagerContainer = document.querySelector('.song-manager');
+
+            // 오버레이 클릭 시 닫기
+            overlay.addEventListener('click', () => {
+                window.location.href = 'song-select.html';
+            });
+
+            // ESC 키 누를 때 닫기
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    window.location.href = 'song-select.html';
+                }
+            });
+
+            // song-manager 영역 클릭 시 이벤트 버블링 방지
+            songManagerContainer.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+
+            // 전체 document 클릭 시 닫기
+            document.addEventListener('click', (e) => {
+                // song-manager나 그 자식 요소가 아닌 곳을 클릭했을 때만 닫기
+                if (!songManagerContainer.contains(e.target) && e.target !== songManagerContainer) {
+                    window.location.href = 'song-select.html';
+                }
+            });
+        });
+    </script>
+</body>
+</html> 
