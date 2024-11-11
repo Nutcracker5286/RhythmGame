@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>노래 선택 - 리듬 게임</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/game.css">
+    <link rel="stylesheet" href="../styles/themes.css">
+    <link rel="stylesheet" href="../styles/modal.css">
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="songSelectMenu">
+            <h2>노래 선택</h2>
+            <div class="song-list">
+                <div class="song-item">
+                    <h3>노래 1</h3>
+                    <p>난이도: ★★☆☆☆</p>
+                    <p class="song-info">BPM: 120 / 길이: 3:30</p>
+                    <button class="button song-select-btn" onclick="selectSong('song1')">선택</button>
+                </div>
+                <div class="song-item">
+                    <h3>노래 2</h3>
+                    <p>난이도: ★★★☆☆</p>
+                    <p class="song-info">BPM: 140 / 길이: 4:00</p>
+                    <button class="button song-select-btn" onclick="selectSong('song2')">선택</button>
+                </div>
+                <div class="song-item">
+                    <h3>노래 3</h3>
+                    <p>난이도: ★★★★☆</p>
+                    <p class="song-info">BPM: 160 / 길이: 3:45</p>
+                    <button class="button song-select-btn" onclick="selectSong('song3')">선택</button>
+                </div>
+            </div>
+            <button id="backToMain" class="button" onclick="goToMain()">뒤로 가기</button>
+        </div>
+    </div>
+
+    <script src="../scripts/ui/Theme.js"></script>
+    <script>
+        // 테마 초기화 및 적용
+        document.addEventListener('DOMContentLoaded', function() {
+            // 저장된 설정 불러오기
+            const settings = JSON.parse(localStorage.getItem('gameSettings')) || {
+                theme: 'warm'
+            };
+
+            // 테마 초기화
+            const theme = new Theme();
+            
+            // 저장된 테마 적용
+            theme.applyTheme(settings.theme);
+        });
+
+        // 노래 선택 함수
+        function selectSong(songId) {
+            console.log('Selected song:', songId);
+            window.location.href = `game.html?song=${songId}`;
+        }
+
+        // 메인으로 돌아가기 함수
+        function goToMain() {
+            console.log('Going back to main');
+            window.location.href = '../index.html';
+        }
+    </script>
+</body>
+</html> 

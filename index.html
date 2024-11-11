@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>리듬 게임</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/modal.css">
+    <link rel="stylesheet" href="styles/themes.css">
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="mainMenu" class="menu-screen">
+            <h1>리듬 게임</h1>
+            <button id="startButton" class="button" onclick="goToSongSelect()">게임 시작</button>
+            <button id="settingsButton" class="button" onclick="openSettings()">설정</button>
+        </div>
+        <div id="settingsModal" class="modal">
+            <div class="modal-content">
+                <h2>설정</h2>
+                <div class="settings-group">
+                    <label for="resolution">해상도</label>
+                    <select id="resolution" class="settings-select">
+                        <option value="fullscreen">전체화면</option>
+                        <option value="1600x1200">1600 x 1200</option>
+                        <option value="1280x720">1280 x 720</option>
+                        <option value="1024x768">1024 x 768</option>
+                        <option value="800x600">800 x 600</option>
+                    </select>
+                </div>
+                <div class="settings-group">
+                    <label for="theme">테마</label>
+                    <select id="theme" class="settings-select">
+                        <option value="warm">따뜻한 톤</option>
+                        <option value="cool">차가운 톤</option>
+                        <option value="dark">어두운 톤</option>
+                        <option value="light">밝은 톤</option>
+                    </select>
+                </div>
+                <button id="saveSettings" class="button" onclick="saveSettings()">저장</button>
+                <button id="closeSettings" class="button" onclick="closeSettings()">닫기</button>
+            </div>
+        </div>
+    </div>
+    <script src="scripts/ui/Settings.js"></script>
+    <script src="scripts/ui/Theme.js"></script>
+    <script>
+        // 테마 초기화
+        const theme = new Theme();
+        const settings = new Settings();
+
+        // 페이지 이동 함수
+        function goToSongSelect() {
+            console.log('Going to song select');
+            window.location.href = 'html/song-select.html';
+        }
+
+        // 설정 관련 함수들
+        function openSettings() {
+            document.getElementById('settingsModal').style.display = 'block';
+            settings.loadCurrentSettings();
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        function saveSettings() {
+            settings.saveCurrentSettings();
+            closeSettings();
+        }
+
+        // 초기 설정 로드
+        document.addEventListener('DOMContentLoaded', function() {
+            settings.loadCurrentSettings();
+        });
+    </script>
+</body>
+</html>

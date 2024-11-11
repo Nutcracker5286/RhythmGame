@@ -1,0 +1,46 @@
+/* 테마 클래스 */
+.theme-warm {
+    --primary-bg: #2C1810;
+    --primary-accent: #FF8C61;
+    --text-color: #FFE4D6;
+}
+
+.theme-cool {
+    --primary-bg: #1A2C3B;
+    --primary-accent: #61B0FF;
+    --text-color: #D6E4FF;
+}
+
+.theme-dark {
+    --primary-bg: #121212;
+    --primary-accent: #404040;
+    --text-color: #FFFFFF;
+}
+
+.theme-light {
+    --primary-bg: #F5F5F5;
+    --primary-accent: #A0A0A0;
+    --text-color: #333333;
+}
+
+/* 반응형 스타일 */
+@media (max-width: 1600px) {
+    #gameContainer.windowed {
+        width: 1280px;
+        height: 720px;
+    }
+}
+
+@media (max-width: 1280px) {
+    #gameContainer.windowed {
+        width: 1024px;
+        height: 768px;
+    }
+}
+
+@media (max-width: 1024px) {
+    #gameContainer.windowed {
+        width: 800px;
+        height: 600px;
+    }
+} 
