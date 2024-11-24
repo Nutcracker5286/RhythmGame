@@ -196,4 +196,4 @@ class Game {
         this.isPlaying = false;
         this.audioManager.stop();
     }
-} 
+}
