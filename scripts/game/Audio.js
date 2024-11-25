@@ -128,4 +128,17 @@ class AudioManager {
     getBeatTime() {
         return this.audioContext ? this.audioContext.currentTime - this.currentSong.startTime : 0;
     }
+
+    setOnBeatCallback(callback) {
+        this.onBeat = callback;
+    }
+
+    startBeatDetection() {
+        // 예시: 비트 감지 로직을 여기에 추가
+        // this.onBeat(); // 비트가 감지될 때 호출
+    }
+
+    stop() {
+        this.cleanup();
+    }
 } 

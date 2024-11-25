@@ -25,29 +25,8 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-    <script src="../scripts/ui/Theme.js"></script>
-    <script src="../scripts/game/Circle.js"></script>
-    <script src="../scripts/game/Particle.js"></script>
-    <script src="../scripts/game/Audio.js"></script>
-    <script src="../scripts/game/Game.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const theme = new Theme();
-            const game = new Game();
-            const urlParams = new URLSearchParams(window.location.search);
-            const songId = urlParams.get('song');
-
-            if (!songId) {
-                window.location.href = 'song-select.html';
-                return;
-            }
-
-            // 일시정지 메뉴 관련 요소들
-            const pauseButton = document.getElementById('pauseButton');
-            const pauseMenu = document.getElementById('pauseMenu');
-            const resumeButton = document.getElementById('resumeButton');
-            const restartButton = document.getElementById('restartButton');
             const songSelectButton = document.getElementById('songSelectButton');
             const mainMenuButton = document.getElementById('mainMenuButton');
 
