@@ -9,6 +9,11 @@ class Game {
         this.lastCircleTime = 0;
         this.circleSpeed = 3;
         this.audioManager = new AudioManager();
+        this.songManager = new SongManager();
+        
+        // Pass song data from SongManager to AudioManager
+        this.audioManager.setSongs(this.songManager.songs);
+    
         
         this.resizeCanvas();
         window.addEventListener('resize', () => this.resizeCanvas());

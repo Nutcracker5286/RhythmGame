@@ -12,6 +12,17 @@ class AudioManager {
         this.lastBeatTime = 0;
     }
 
+    setSongs(songList) {
+        // Convert SongManager's song list to AudioManager's format
+        songList.forEach(song => {
+            this.songs[song.id] = {
+                url: song.file,
+                bpm: song.bpm,
+                difficulty: song.difficulty
+            };
+        });
+    }
+    
     initAudioContext() {
         try {
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
