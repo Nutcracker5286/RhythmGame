@@ -30,6 +30,10 @@
             const songSelectButton = document.getElementById('songSelectButton');
             const mainMenuButton = document.getElementById('mainMenuButton');
 
+            // URL에서 songId 파라미터 가져오기
+            const urlParams = new URLSearchParams(window.location.search);
+            const songId = urlParams.get('songId');
+
             // 일시정지 버튼
             pauseButton.addEventListener('click', () => {
                 game.pause();
@@ -67,7 +71,8 @@
             theme.applyTheme(settings.theme);
 
             // 게임 시작
-            game.startGame(songId);
+            const game = new Game();
+            game.startGame(songId); // songId를 사용하여 게임 시작
         });
     </script>
 </body>

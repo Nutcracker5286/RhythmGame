@@ -39,6 +39,7 @@
 
     <script src="../scripts/ui/Theme.js"></script>
     <script src="../scripts/game/SongManager.js"></script>
+    <script src="../scripts/game/Game.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const songManager = new SongManager();
@@ -60,8 +61,8 @@
 
         // 노래 선택 함수
         function selectSong(songId) {
-            const game = new Game();
-            game.startGame(songId);
+            // songId를 URL 파라미터로 전달하여 game.html로 이동
+            window.location.href = `game.html?songId=${songId}`;
         }
 
         // 메인으로 돌아가기 함수
