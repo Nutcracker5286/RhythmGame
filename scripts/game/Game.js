@@ -52,9 +52,12 @@ class Game {
     }
 
     createCircle() {
-        const x = Math.random() * (this.canvas.width - 100) + 50;
-        const y = Math.random() * (this.canvas.height - 100) + 50;
-        const circle = new Circle(x, y, 30);
+        const canvas = document.getElementById('gameCanvas');
+        const x = Math.random() * (canvas.width - 100) + 50;
+        const y = Math.random() * (canvas.height - 100) + 50;
+        const radius = 30;
+        
+        const circle = new Circle(x, y, radius);
         this.circles.push(circle);
     }
 
@@ -68,7 +71,7 @@ class Game {
         for (let i = this.circles.length - 1; i >= 0; i--) {
             const circle = this.circles[i];
             if (circle.isClicked(x, y)) {
-                this.createParticlesForCircle(circle);
+                this.createParticles(x, y);
                 this.circles.splice(i, 1);
                 this.updateScore(this.score + 100);
                 break;
@@ -76,52 +79,32 @@ class Game {
         }
     }
 
-    createParticlesForCircle(circle) {
-        const particleCount = 40;
-        const themeColors = {
-            primary: getComputedStyle(document.documentElement).getPropertyValue('--primary-accent').trim(),
-            text: getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim(),
-            hover: getComputedStyle(document.documentElement).getPropertyValue('--hover-color').trim()
-        };
-
-        const colors = [
-            themeColors.primary,
-            themeColors.hover,
-            themeColors.text,
-            this.adjustColor(themeColors.primary, 20),
-            this.adjustColor(themeColors.primary, -20)
-        ];
-
+    createParticles(x, y) {
+        const colors = ['#FF8C61', '#FFB961', '#FF6161'];
         const particles = [];
 
-        for (let i = 0; i < particleCount; i++) {
+        // 파티클 요소 생성
+        for (let i = 0; i < 15; i++) {
             const particle = document.createElement('div');
             particle.className = 'particle';
-            particle.style.position = 'absolute';
-            particle.style.left = `${circle.x}px`;
-            particle.style.top = `${circle.y}px`;
             particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
             this.canvas.parentElement.appendChild(particle);
             particles.push(particle);
         }
 
+        // 애니메이션 설정
         anime({
             targets: particles,
-            translateX: () => anime.random(-150, 150),
-            translateY: () => anime.random(-150, 150),
-            scale: [
-                {value: 1, duration: 100, easing: 'easeOutQuad'},
-                {value: 0, duration: 900, easing: 'easeInQuad'}
-            ],
-            rotate: () => anime.random(-360, 360),
-            opacity: [
-                {value: 1, duration: 100, easing: 'easeOutQuad'},
-                {value: 0, duration: 900, easing: 'easeInQuad'}
-            ],
-            duration: 1000,
+            translateX: () => anime.random(-100, 100),
+            translateY: () => anime.random(-100, 100),
+            scale: [1, 0],
+            opacity: [1, 0],
             easing: 'easeOutExpo',
+            duration: 1000,
             complete: () => {
-                particles.forEach(p => p.remove());
+                particles.forEach(particle => particle.remove());
             }
         });
     }
@@ -164,19 +147,14 @@ class Game {
 
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // CSS 변수에서 accent 색상 가져오기
+        const accentColor = getComputedStyle(document.documentElement)
+            .getPropertyValue('--primary-accent')
+            .trim();
+        
         this.circles.forEach(circle => {
-            if (!circle.shrinking) {
-                const accentColor = getComputedStyle(document.documentElement)
-                    .getPropertyValue('--primary-accent')
-                    .trim();
-                
-                this.ctx.beginPath();
-                this.ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
-                this.ctx.fillStyle = `${accentColor}CC`;
-                this.ctx.fill();
-                this.ctx.strokeStyle = `${accentColor}`;
-                this.ctx.stroke();
-            }
+            circle.draw(this.ctx, accentColor);
         });
     }
 

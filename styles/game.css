@@ -196,10 +196,11 @@
 
 /* 파티클 스타일 추가 */
 .particle {
-    width: 10px;
-    height: 10px;
     position: absolute;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     pointer-events: none;
     z-index: 1000;
+    transform-origin: center;
 }
