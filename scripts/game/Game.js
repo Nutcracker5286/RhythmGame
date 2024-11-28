@@ -146,15 +146,19 @@ class Game {
     }
 
     draw() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        // CSS 변수에서 테마 색상 가져오기
+        const computedStyle = getComputedStyle(document.documentElement);
+        const primaryBg = computedStyle.getPropertyValue('--primary-bg').trim();
+        const accentColor = computedStyle.getPropertyValue('--primary-accent').trim();
+        const textColor = computedStyle.getPropertyValue('--text-color').trim();
         
-        // CSS 변수에서 accent 색상 가져오기
-        const accentColor = getComputedStyle(document.documentElement)
-            .getPropertyValue('--primary-accent')
-            .trim();
+        // 배경 그리기
+        this.ctx.fillStyle = primaryBg;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
+        // 원과 파티클 그리기
         this.circles.forEach(circle => {
-            circle.draw(this.ctx, accentColor);
+            circle.draw(this.ctx, accentColor, textColor);
         });
     }
 

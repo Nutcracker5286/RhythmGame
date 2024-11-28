@@ -164,7 +164,8 @@
 }
 
 #pauseButton {
-    background: rgba(255, 140, 97, 0.3);
+    background: var(--primary-accent);
+    opacity: 0.3;
 }
 
 #pauseMenu {
@@ -173,7 +174,11 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
+    background: linear-gradient(
+        135deg,
+        var(--menu-bg, rgba(44, 24, 16, 0.95)) 0%,
+        var(--menu-accent, rgba(255, 140, 97, 0.8)) 100%
+    );
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -183,7 +188,7 @@
 }
 
 #pauseMenu h2 {
-    color: #FFE4D6;
+    color: var(--text-color);
     font-size: 2.5em;
     margin-bottom: 20px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);

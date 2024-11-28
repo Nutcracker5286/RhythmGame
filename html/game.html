@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="../styles/themes.css">
     <link rel="stylesheet" href="../styles/modal.css">
 </head>
-<body class="theme-warm">
+<body>
     <div id="gameContainer">
         <canvas id="gameCanvas"></canvas>
         <div id="score">점수: 0</div>
@@ -31,6 +31,7 @@
     <script src="../scripts/game/Particle.js"></script>
     <script src="../scripts/game/SongManager.js"></script>
     <script src="../scripts/game/Game.js"></script>
+    <script src="../scripts/ui/Theme.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const songSelectButton = document.getElementById('songSelectButton');
@@ -78,6 +79,14 @@
 
             // 게임 시작
             game.startGame(songId); // songId를 사용하여 게임 시작
+
+            // 저장된 설정 불러오기
+            const settings = JSON.parse(localStorage.getItem('gameSettings')) || { theme: 'warm' };
+            const theme = new Theme();
+            
+            // 테마 적용
+            document.body.className = `theme-${settings.theme}`;
+            theme.applyTheme(settings.theme);
         });
     </script>
 </body>

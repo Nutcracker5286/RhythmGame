@@ -15,17 +15,17 @@ class Circle {
         return distance <= this.radius && !this.shrinking;
     }
 
-    draw(ctx) {
+    draw(ctx, accentColor, textColor) {
         if (!this.shrinking) {
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 140, 97, ${this.opacity})`;
+            ctx.fillStyle = `${accentColor}${Math.floor(this.opacity * 255).toString(16).padStart(2, '0')}`;
             ctx.fill();
-            ctx.strokeStyle = `rgba(255, 255, 255, ${this.opacity})`;
+            ctx.strokeStyle = `${textColor}${Math.floor(this.opacity * 255).toString(16).padStart(2, '0')}`;
             ctx.stroke();
         }
 
         // 파티클 그리기
-        this.particles.forEach(particle => particle.draw(ctx));
+        this.particles.forEach(particle => particle.draw(ctx, accentColor, textColor));
     }
 } 

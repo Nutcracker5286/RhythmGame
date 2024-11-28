@@ -28,36 +28,36 @@ class Particle {
         return this.life > 0;
     }
 
-    draw(ctx) {
+    draw(ctx, accentColor, textColor) {
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(this.rotation);
         ctx.globalAlpha = this.opacity;
 
         if (this.shape === 'triangle') {
-            this.drawTriangle(ctx);
+            this.drawTriangle(ctx, accentColor, textColor);
         } else {
-            this.drawRectangle(ctx);
+            this.drawRectangle(ctx, accentColor, textColor);
         }
 
         ctx.restore();
     }
 
-    drawTriangle(ctx) {
+    drawTriangle(ctx, accentColor, textColor) {
         ctx.beginPath();
         ctx.moveTo(0, -this.size);
         ctx.lineTo(this.size * 0.866, this.size * 0.5);
         ctx.lineTo(-this.size * 0.866, this.size * 0.5);
         ctx.closePath();
-        ctx.fillStyle = this.color;
+        ctx.fillStyle = accentColor;
         ctx.fill();
-        ctx.strokeStyle = '#FFFFFF33';
+        ctx.strokeStyle = textColor + '33';
         ctx.stroke();
     }
 
-    drawRectangle(ctx) {
-        ctx.fillStyle = this.color;
-        ctx.strokeStyle = '#FFFFFF33';
+    drawRectangle(ctx, accentColor, textColor) {
+        ctx.fillStyle = accentColor;
+        ctx.strokeStyle = textColor + '33';
         ctx.beginPath();
         ctx.rect(-this.size/2, -this.size/2, this.size, this.size);
         ctx.fill();
