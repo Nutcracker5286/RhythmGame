@@ -209,3 +209,64 @@
     z-index: 1000;
     transform-origin: center;
 }
+
+#hpBarContainer {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    max-width: 600px;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+#hpBar {
+    width: 100%;
+    height: 100%;
+    background-color: #4CAF50;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.game-over-modal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.game-over-modal .modal-content {
+    text-align: center;
+    padding: 40px;
+}
+
+.game-over-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.judgement-text {
+    position: absolute;
+    font-size: 24px;
+    color: var(--text-color);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    z-index: 1000;
+    transform: translate(-50%, -50%);
+    animation: fadeUpAndOut 1s ease-out forwards;
+}
+
+@keyframes fadeUpAndOut {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -100%);
+    }
+}

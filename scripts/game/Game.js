@@ -8,10 +8,15 @@ class Game {
         this.currentSong = null;
         this.lastCircleTime = 0;
         this.circleSpeed = 3;
+        this.gameEndThreshold = 10; // 놓친 노트 개수 임계값
+        this.missedNotes = 0;
         
         // SongManager 초기화 (UI 초기화 없이)
         this.songManager = new SongManager(false);
         this.audioManager = new AudioManager();
+        
+        // ScoreSystem 초기화 추가
+        this.scoreSystem = new ScoreSystem();
         
         // 노래 데이터 전달
         this.songManager.loadSongs().then(() => {
@@ -25,6 +30,20 @@ class Game {
         this.audioManager.setOnBeatCallback(() => {
             this.createCircle();
         });
+        
+        // HP 시스템 추가
+        this.maxHp = 100;
+        this.currentHp = this.maxHp;
+        this.hpDecreaseRate = {
+            miss: 20,    // 미스 시 HP 감소량
+            good: 5,     // GOOD 판정 시 HP 감소량
+            great: 0,    // GREAT 판정 시 HP 변화 없음
+            perfect: 5   // PERFECT 판정 시 HP 회복량
+        };
+        
+        // 콤보에 따른 HP 보정
+        this.comboHpBonus = 0.1; // 10콤보당 HP 감소량 10% 감소
+        this.maxComboBonus = 0.5; // 최대 50%까지 HP 감소량 감소
     }
 
     resizeCanvas() {
@@ -45,8 +64,15 @@ class Game {
             return;
         }
 
+        // currentSong 설정
+        this.currentSong = {
+            id: songId,
+            ...this.audioManager.songs[songId]
+        };
+
         this.isPlaying = true;
         this.score = 0;
+        this.currentHp = this.maxHp; // HP 초기화 추가
         this.audioManager.play();
         this.gameLoop();
     }
@@ -62,20 +88,35 @@ class Game {
     }
 
     handleClick(e) {
-        if (!this.isPlaying) return;
-
         const rect = this.canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
 
+        let hitNote = false;
         for (let i = this.circles.length - 1; i >= 0; i--) {
             const circle = this.circles[i];
             if (circle.isClicked(x, y)) {
                 this.createParticles(x, y);
+                
+                // 점수 및 콤보 업데이트
+                const timingDiff = circle.getTimingDifference();
+                const hitResult = this.scoreSystem.evaluateHit(timingDiff);
+                
+                // 판정 텍스트 표시
+                this.showJudgementText(x, y - 50, hitResult.text);
+                
+                // 점수 업데이트
+                this.updateScore(this.scoreSystem.currentScore);
+                
                 this.circles.splice(i, 1);
-                this.updateScore(this.score + 100);
+                hitNote = true;
                 break;
             }
+        }
+
+        if (!hitNote) {
+            this.scoreSystem.evaluateHit(1); // 미스 처리
+            this.showJudgementText(x, y - 50, "미스!");
         }
     }
 
@@ -133,9 +174,20 @@ class Game {
             this.lastCircleTime = currentTime;
         }
 
+        // 만료된 노트 처리
         for (let i = this.circles.length - 1; i >= 0; i--) {
             const circle = this.circles[i];
             
+            // 노트가 만료되었는지 확인
+            if (circle.checkExpired()) {
+                this.circles.splice(i, 1);
+                this.updateHp('miss'); // HP 감소
+                this.missedNotes++;
+                this.checkGameEnd();
+                continue;
+            }
+
+            // 파티클 업데이트
             for (let j = circle.particles.length - 1; j >= 0; j--) {
                 const particle = circle.particles[j];
                 if (!particle.update()) {
@@ -183,5 +235,146 @@ class Game {
     stop() {
         this.isPlaying = false;
         this.audioManager.stop();
+    }
+
+    checkGameEnd() {
+        // HP가 0이 되었거나 노래가 끝났을 때
+        if (this.currentHp <= 0 || !this.audioManager.isPlaying) {
+            const reason = this.currentHp <= 0 ? 'hp' : 'complete';
+            this.endGame(reason);
+        }
+    }
+
+    endGame(reason) {
+        this.isPlaying = false;
+        this.audioManager.stop();
+        
+        // 결과 데이터 준비
+        const results = {
+            songId: this.currentSong.id,
+            songTitle: this.currentSong.title,
+            finalScore: this.scoreSystem.currentScore,
+            maxCombo: this.scoreSystem.maxCombo,
+            accuracy: this.scoreSystem.getResults().accuracy,
+            hitResults: this.scoreSystem.hitResults,
+            reason: reason
+        };
+
+        // 결과 페이지로 이동
+        const queryParams = new URLSearchParams(results).toString();
+        window.location.href = `result.html?${queryParams}`;
+    }
+
+    updateHp(judgement) {
+        let hpChange = 0;
+        const comboMultiplier = Math.min(
+            1 - (Math.floor(this.scoreSystem.combo / 10) * this.comboHpBonus),
+            1 - this.maxComboBonus
+        );
+
+        switch(judgement) {
+            case 'miss':
+                hpChange = -this.hpDecreaseRate.miss * comboMultiplier;
+                break;
+            case 'good':
+                hpChange = -this.hpDecreaseRate.good * comboMultiplier;
+                break;
+            case 'great':
+                hpChange = this.hpDecreaseRate.great;
+                break;
+            case 'perfect':
+                hpChange = this.hpDecreaseRate.perfect;
+                break;
+        }
+
+        this.currentHp = Math.min(Math.max(0, this.currentHp + hpChange), this.maxHp);
+        this.updateHpBar();
+        
+        if (this.currentHp <= 0) {
+            this.gameOver('hp');
+        }
+    }
+
+    updateHpBar() {
+        const hpBar = document.getElementById('hpBar');
+        if (hpBar) {
+            hpBar.style.width = `${this.currentHp}%`;
+            hpBar.style.backgroundColor = this.getHpColor();
+        }
+    }
+
+    getHpColor() {
+        if (this.currentHp > 66) return '#4CAF50';
+        if (this.currentHp > 33) return '#FFC107';
+        return '#F44336';
+    }
+
+    gameOver(reason) {
+        this.isPlaying = false;
+        this.audioManager.stop();
+        
+        // 결과 데이터 준비
+        const results = {
+            songId: this.currentSong?.id || '',
+            songTitle: this.currentSong?.title || '알 수 없는 곡',
+            finalScore: this.score,
+            maxCombo: this.scoreSystem.maxCombo,
+            accuracy: this.scoreSystem.getResults().accuracy,
+            hitResults: this.scoreSystem.hitResults,
+            reason: reason
+        };
+
+        // 게과 페이지로 이동
+        const queryParams = new URLSearchParams(results).toString();
+        window.location.href = `result.html?${queryParams}`;
+    }
+
+    showGameOverModal(results) {
+        const modal = document.createElement('div');
+        modal.className = 'modal game-over-modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h2>${results.reason === 'hp' ? '게임 오버!' : '게임 완료!'}</h2>
+                <p>최종 점수: ${results.finalScore}</p>
+                <p>최대 콤보: ${results.maxCombo}</p>
+                <p>정확도: ${results.accuracy}%</p>
+                <div class="game-over-buttons">
+                    <button onclick="game.retryGame()" class="button">다시 시도</button>
+                    <button onclick="game.goToSongSelect()" class="button">곡 선택</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    retryGame() {
+        const songId = this.currentSong.id;
+        document.querySelector('.game-over-modal').remove();
+        this.resetGame();
+        this.startGame(songId);
+    }
+
+    resetGame() {
+        this.score = 0;
+        this.currentHp = this.maxHp;
+        this.circles = [];
+        this.scoreSystem.reset();
+        this.updateHpBar();
+    }
+
+    // 판정 텍스트 표시 메서드 추가
+    showJudgementText(x, y, text) {
+        const judgement = document.createElement('div');
+        judgement.className = 'judgement-text';
+        judgement.textContent = text;
+        judgement.style.left = `${x}px`;
+        judgement.style.top = `${y}px`;
+        
+        this.canvas.parentElement.appendChild(judgement);
+        
+        // 애니메이션 후 제거
+        setTimeout(() => {
+            judgement.remove();
+        }, 1000);
     }
 }

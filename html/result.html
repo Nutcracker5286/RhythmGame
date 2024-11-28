@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게임 결과 - 리듬 게임</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/themes.css">
+    <link rel="stylesheet" href="../styles/result.css">
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="resultScreen" class="menu-screen">
+            <h2>게임 결과</h2>
+            <div class="result-stats">
+                <div class="stat-item">
+                    <span class="stat-label">곡 제목</span>
+                    <span id="songTitle" class="stat-value">-</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">최종 점수</span>
+                    <span id="finalScore" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">최대 콤보</span>
+                    <span id="maxCombo" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">정확도</span>
+                    <span id="accuracy" class="stat-value">0%</span>
+                </div>
+                <div class="hit-results">
+                    <div class="hit-item perfect">퍼펙트: <span id="perfectCount">0</span></div>
+                    <div class="hit-item great">그레이트: <span id="greatCount">0</span></div>
+                    <div class="hit-item good">굿: <span id="goodCount">0</span></div>
+                    <div class="hit-item miss">미스: <span id="missCount">0</span></div>
+                </div>
+            </div>
+            <div class="result-buttons">
+                <button class="button" onclick="retryGame()">다시하기</button>
+                <button class="button" onclick="goToSongSelect()">노래 선택</button>
+                <button class="button" onclick="goToMain()">메인 메뉴</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../scripts/ui/Theme.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // URL 파라미터에서 결과 데이터 가져오기
+            const params = new URLSearchParams(window.location.search);
+            const results = JSON.parse(decodeURIComponent(params.get('results')));
+            
+            // 결과 표시
+            document.getElementById('songTitle').textContent = results.songTitle;
+            document.getElementById('finalScore').textContent = results.finalScore;
+            document.getElementById('maxCombo').textContent = results.maxCombo;
+            document.getElementById('accuracy').textContent = `${results.accuracy}%`;
+            document.getElementById('perfectCount').textContent = results.hitResults.perfect;
+            document.getElementById('greatCount').textContent = results.hitResults.great;
+            document.getElementById('goodCount').textContent = results.hitResults.good;
+            document.getElementById('missCount').textContent = results.hitResults.miss;
+
+            // 테마 적용
+            const theme = new Theme();
+            const settings = JSON.parse(localStorage.getItem('gameSettings')) || { theme: 'warm' };
+            theme.applyTheme(settings.theme);
+        });
+
+        function retryGame() {
+            const params = new URLSearchParams(window.location.search);
+            const songId = params.get('songId');
+            window.location.href = `game.html?songId=${songId}`;
+        }
+
+        function goToSongSelect() {
+            window.location.href = 'song-select.html';
+        }
+
+        function goToMain() {
+            window.location.href = '../index.html';
+        }
+    </script>
+</body>
+</html> 

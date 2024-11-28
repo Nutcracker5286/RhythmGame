@@ -21,6 +21,11 @@ class ScoreSystem {
 
     initializeUI() {
         const scoreContainer = document.getElementById('score');
+        if (!scoreContainer) {
+            console.error('점수 컨테이너를 찾을 수 없습니다');
+            return;
+        }
+        
         scoreContainer.innerHTML = `
             <div class="score-display">점수: ${this.currentScore}</div>
             <div class="combo-display">콤보: ${this.combo}</div>
@@ -28,12 +33,11 @@ class ScoreSystem {
         `;
     }
 
-    calculateHitScore(timing) {
-        const absoluteTiming = Math.abs(timing);
+    evaluateHit(timingDifference) {
         let grade = 'miss';
         
         for (const [gradeName, gradeData] of Object.entries(this.grades)) {
-            if (absoluteTiming <= gradeData.range) {
+            if (Math.abs(timingDifference) <= gradeData.range) {
                 grade = gradeName;
                 break;
             }

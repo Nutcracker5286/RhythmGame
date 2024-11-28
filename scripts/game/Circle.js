@@ -6,6 +6,18 @@ class Circle {
         this.shrinking = false;
         this.opacity = 1;
         this.particles = [];
+        
+        this.createdAt = Date.now();
+        this.lifetime = 2000; // 2초
+        this.expired = false;
+    }
+
+    checkExpired() {
+        if (!this.expired && Date.now() - this.createdAt >= this.lifetime) {
+            this.expired = true;
+            return true;
+        }
+        return false;
     }
 
     isClicked(x, y) {
@@ -27,5 +39,11 @@ class Circle {
 
         // 파티클 그리기
         this.particles.forEach(particle => particle.draw(ctx, accentColor, textColor));
+    }
+
+    getTimingDifference() {
+        const currentTime = Date.now();
+        const timeDiff = (currentTime - this.createdAt) / this.lifetime;
+        return Math.abs(1 - timeDiff); // 0에 가까울수록 정확한 타이밍
     }
 } 
