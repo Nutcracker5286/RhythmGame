@@ -8,12 +8,15 @@ class Game {
         this.currentSong = null;
         this.lastCircleTime = 0;
         this.circleSpeed = 3;
-        this.audioManager = new AudioManager();
-        this.songManager = new SongManager();
         
-        // Pass song data from SongManager to AudioManager
-        this.audioManager.setSongs(this.songManager.songs);
-    
+        // SongManager 초기화 (UI 초기화 없이)
+        this.songManager = new SongManager(false);
+        this.audioManager = new AudioManager();
+        
+        // 노래 데이터 전달
+        this.songManager.loadSongs().then(() => {
+            this.audioManager.setSongs(this.songManager.songs);
+        });
         
         this.resizeCanvas();
         window.addEventListener('resize', () => this.resizeCanvas());
@@ -31,6 +34,11 @@ class Game {
     }
 
     async startGame(songId) {
+        // 노래 데이터가 로드될 때까지 대기
+        if (!this.audioManager.songs[songId]) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        
         const loaded = await this.audioManager.loadSong(songId);
         if (!loaded) {
             console.error('Failed to load song');
@@ -39,13 +47,6 @@ class Game {
 
         this.isPlaying = true;
         this.score = 0;
-        this.circles = [];
-        this.currentSong = songId;
-        this.updateScore(0);
-        
-        const difficulty = this.audioManager.getDifficulty();
-        this.circleSpeed = 3 + difficulty;
-        
         this.audioManager.play();
         this.gameLoop();
     }

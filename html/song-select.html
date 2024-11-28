@@ -14,24 +14,7 @@
         <div id="songSelectMenu">
             <h2>노래 선택</h2>
             <div class="song-list">
-                <div class="song-item">
-                    <h3>노래 1</h3>
-                    <p>난이도: ★★☆☆☆</p>
-                    <p class="song-info">BPM: 120 / 길이: 3:30</p>
-                    <button class="button song-select-btn" onclick="selectSong('song1')">선택</button>
-                </div>
-                <div class="song-item">
-                    <h3>노래 2</h3>
-                    <p>난이도: ★★★☆☆</p>
-                    <p class="song-info">BPM: 140 / 길이: 4:00</p>
-                    <button class="button song-select-btn" onclick="selectSong('song2')">선택</button>
-                </div>
-                <div class="song-item">
-                    <h3>노래 3</h3>
-                    <p>난이도: ★★★★☆</p>
-                    <p class="song-info">BPM: 160 / 길이: 3:45</p>
-                    <button class="button song-select-btn" onclick="selectSong('song3')">선택</button>
-                </div>
+                <!-- 여기는 비워두고 SongManager가 동적으로 채울 것입니다 -->
             </div>
             <button id="backToMain" class="button" onclick="goToMain()">뒤로 가기</button>
         </div>
@@ -42,8 +25,8 @@
     <script src="../scripts/game/Game.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const songManager = new SongManager();
-            songManager.updateSongList(); // 노래 목록 업데이트 호출
+            const songManager = new SongManager(true);
+            songManager.updateSongList();
             const theme = new Theme();
 
             // 저장된 설정 불러오기
