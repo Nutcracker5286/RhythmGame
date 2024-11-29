@@ -66,15 +66,18 @@ class Game {
             return;
         }
 
-        // currentSong 설정
+        // currentSong 설정 수정
+        const songData = this.songManager.songs.find(song => song.id === songId);
         this.currentSong = {
             id: songId,
+            title: songData.title,
+            artist: songData.artist,
             ...this.audioManager.songs[songId]
         };
 
         this.isPlaying = true;
         this.score = 0;
-        this.currentHp = this.maxHp; // HP 초기화 추가
+        this.currentHp = this.maxHp;
         this.audioManager.play();
         this.gameLoop();
     }
@@ -90,6 +93,8 @@ class Game {
     }
 
     handleClick(e) {
+        if (!this.isPlaying) return; // 게임이 시작되지 않았으면 클릭 무시
+        
         const rect = this.canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
@@ -100,28 +105,24 @@ class Game {
             if (circle.isClicked(x, y)) {
                 this.createParticles(x, y);
                 
-                // 노트 생성 후 경과 시간에 따른 판정
                 const timeDiff = (Date.now() - circle.createdAt) / circle.lifetime;
                 let hitResult;
                 
-                if (timeDiff <= 0.5) { // 매우 빠른 타이밍
+                if (timeDiff <= 0.5) {
                     hitResult = this.scoreSystem.evaluateHit('perfect');
                     this.updateHp('perfect');
-                } else if (timeDiff <= 0.8) { // 좋은 타이밍
+                } else if (timeDiff <= 0.8) {
                     hitResult = this.scoreSystem.evaluateHit('great');
                     this.updateHp('great');
-                } else if (timeDiff <= 1.0) { // 느린 타이밍
+                } else if (timeDiff <= 1.0) {
                     hitResult = this.scoreSystem.evaluateHit('good');
                     this.updateHp('good');
-                } else { // 너무 느린 타이밍
+                } else {
                     hitResult = this.scoreSystem.evaluateHit('miss');
                     this.updateHp('miss');
                 }
                 
-                // 판정 텍스트 표시
                 this.showJudgementText(x, y - 50, hitResult.text);
-                
-                // 점수 업데이트
                 this.updateScore(this.scoreSystem.currentScore);
                 
                 this.circles.splice(i, 1);
@@ -130,8 +131,8 @@ class Game {
             }
         }
 
-        if (!hitNote) {
-            // 노트를 못 맞췄을 때 미스 처리 및 HP 감소
+        // 노트가 없거나 노트를 놓쳤을 때는 미스 처리하지 않음
+        if (!hitNote && this.circles.length > 0) {
             this.scoreSystem.evaluateHit('miss');
             this.updateHp('miss');
             this.showJudgementText(x, y - 50, "미스!");

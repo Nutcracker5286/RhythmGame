@@ -28,9 +28,19 @@ class ScoreSystem {
         
         scoreContainer.innerHTML = `
             <div class="score-display">점수: ${this.currentScore}</div>
-            <div class="combo-display">콤보: ${this.combo}</div>
             <div class="grade-display"></div>
         `;
+        
+        // 콤보 표시 컨테이너가 없으면 생성
+        if (!document.getElementById('comboDisplay')) {
+            const comboDisplay = document.createElement('div');
+            comboDisplay.id = 'comboDisplay';
+            comboDisplay.className = 'combo-display';
+            comboDisplay.innerHTML = `
+                <div class="combo-count">콤보: 0</div>
+            `;
+            document.getElementById('gameContainer').appendChild(comboDisplay);
+        }
     }
 
     evaluateHit(grade) {
@@ -80,11 +90,18 @@ class ScoreSystem {
 
     updateUI(grade, score) {
         const scoreDisplay = document.querySelector('.score-display');
-        const comboDisplay = document.querySelector('.combo-display');
+        const comboDisplay = document.getElementById('comboDisplay');
         const gradeDisplay = document.querySelector('.grade-display');
 
         if (scoreDisplay) scoreDisplay.textContent = `점수: ${this.currentScore}`;
-        if (comboDisplay) comboDisplay.textContent = `콤보: ${this.combo}`;
+        if (comboDisplay) {
+            comboDisplay.querySelector('.combo-count').textContent = `콤보: ${this.combo}`;
+            
+            // 콤보 효과 애니메이션 추가
+            comboDisplay.classList.remove('combo-effect');
+            void comboDisplay.offsetWidth; // 리플로우 강제
+            comboDisplay.classList.add('combo-effect');
+        }
         if (gradeDisplay) {
             gradeDisplay.textContent = this.grades[grade].text;
             gradeDisplay.className = `grade-display grade-${grade}`;

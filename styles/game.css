@@ -270,3 +270,28 @@
         transform: translate(-50%, -100%);
     }
 }
+
+/* 콤보 표시 스타일 */
+#comboDisplay {
+    position: absolute;
+    top: 80px;
+    right: 20px;
+    color: var(--text-color);
+    font-size: 24px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    background: var(--primary-accent);
+    padding: 10px 20px;
+    border-radius: 15px;
+    opacity: 0.8;
+    transition: transform 0.2s ease;
+}
+
+.combo-effect {
+    animation: comboPopup 0.3s ease;
+}
+
+@keyframes comboPopup {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
