@@ -44,6 +44,6 @@ class Circle {
     getTimingDifference() {
         const currentTime = Date.now();
         const timeDiff = (currentTime - this.createdAt) / this.lifetime;
-        return Math.abs(1 - timeDiff); // 0에 가까울수록 정확한 타이밍
+        return timeDiff; // 0에 가까울수록 빠른 타이밍
     }
 } 

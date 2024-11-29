@@ -32,13 +32,15 @@ class Game {
         });
         
         // HP 시스템 추가
+
+        
         this.maxHp = 100;
         this.currentHp = this.maxHp;
         this.hpDecreaseRate = {
-            miss: 20,    // 미스 시 HP 감소량
-            good: 5,     // GOOD 판정 시 HP 감소량
-            great: 0,    // GREAT 판정 시 HP 변화 없음
-            perfect: 5   // PERFECT 판정 시 HP 회복량
+            miss: 20,     // 미스 시 HP 감소량
+            good: 5,      // GOOD 판정 시 HP 회복량
+            great: 8,     // GREAT 판정 시 HP 변화
+            perfect: 10    // PERFECT 판정 시 HP 회복량 (미스 감소량의 50%)
         };
         
         // 콤보에 따른 HP 보정
@@ -98,9 +100,23 @@ class Game {
             if (circle.isClicked(x, y)) {
                 this.createParticles(x, y);
                 
-                // 점수 및 콤보 업데이트
-                const timingDiff = circle.getTimingDifference();
-                const hitResult = this.scoreSystem.evaluateHit(timingDiff);
+                // 노트 생성 후 경과 시간에 따른 판정
+                const timeDiff = (Date.now() - circle.createdAt) / circle.lifetime;
+                let hitResult;
+                
+                if (timeDiff <= 0.5) { // 매우 빠른 타이밍
+                    hitResult = this.scoreSystem.evaluateHit('perfect');
+                    this.updateHp('perfect');
+                } else if (timeDiff <= 0.8) { // 좋은 타이밍
+                    hitResult = this.scoreSystem.evaluateHit('great');
+                    this.updateHp('great');
+                } else if (timeDiff <= 1.0) { // 느린 타이밍
+                    hitResult = this.scoreSystem.evaluateHit('good');
+                    this.updateHp('good');
+                } else { // 너무 느린 타이밍
+                    hitResult = this.scoreSystem.evaluateHit('miss');
+                    this.updateHp('miss');
+                }
                 
                 // 판정 텍스트 표시
                 this.showJudgementText(x, y - 50, hitResult.text);
@@ -115,7 +131,9 @@ class Game {
         }
 
         if (!hitNote) {
-            this.scoreSystem.evaluateHit(1); // 미스 처리
+            // 노트를 못 맞췄을 때 미스 처리 및 HP 감소
+            this.scoreSystem.evaluateHit('miss');
+            this.updateHp('miss');
             this.showJudgementText(x, y - 50, "미스!");
         }
     }
@@ -181,6 +199,7 @@ class Game {
             // 노트가 만료되었는지 확인
             if (circle.checkExpired()) {
                 this.circles.splice(i, 1);
+                this.scoreSystem.evaluateHit('miss'); // 미스 처리 추가
                 this.updateHp('miss'); // HP 감소
                 this.missedNotes++;
                 this.checkGameEnd();
@@ -249,20 +268,27 @@ class Game {
         this.isPlaying = false;
         this.audioManager.stop();
         
-        // 결과 데이터 준비
-        const results = {
-            songId: this.currentSong.id,
-            songTitle: this.currentSong.title,
-            finalScore: this.scoreSystem.currentScore,
-            maxCombo: this.scoreSystem.maxCombo,
-            accuracy: this.scoreSystem.getResults().accuracy,
-            hitResults: this.scoreSystem.hitResults,
-            reason: reason
-        };
+        // ScoreSystem에서 상세 결과 가져오기
+        const scoreResults = this.scoreSystem.getResults();
+        
+        // URL 파라미터 생성
+        const params = new URLSearchParams();
+        params.append('songId', this.currentSong.id);
+        params.append('songTitle', encodeURIComponent(this.currentSong.title));
+        params.append('artist', encodeURIComponent(this.currentSong.artist));
+        params.append('finalScore', scoreResults.finalScore);
+        params.append('maxCombo', scoreResults.maxCombo);
+        params.append('accuracy', scoreResults.accuracy);
+        params.append('hitResults', JSON.stringify({
+            perfect: scoreResults.hitResults.perfect,
+            great: scoreResults.hitResults.great,
+            good: scoreResults.hitResults.good,
+            miss: scoreResults.hitResults.miss
+        }));
+        params.append('reason', reason);
 
         // 결과 페이지로 이동
-        const queryParams = new URLSearchParams(results).toString();
-        window.location.href = `result.html?${queryParams}`;
+        window.location.href = `result.html?${params.toString()}`;
     }
 
     updateHp(judgement) {
@@ -277,13 +303,14 @@ class Game {
                 hpChange = -this.hpDecreaseRate.miss * comboMultiplier;
                 break;
             case 'good':
-                hpChange = -this.hpDecreaseRate.good * comboMultiplier;
+                hpChange = this.hpDecreaseRate.good * comboMultiplier;
                 break;
             case 'great':
                 hpChange = this.hpDecreaseRate.great;
                 break;
             case 'perfect':
-                hpChange = this.hpDecreaseRate.perfect;
+                // 콤보에 따라 회복량 증가 (기본 회복량은 미스 감소량의 20%)
+                hpChange = this.hpDecreaseRate.perfect * (1 + (this.scoreSystem.combo * 0.005)); // 콤보 보너스 감소 (0.01 -> 0.005)
                 break;
         }
 
@@ -291,7 +318,7 @@ class Game {
         this.updateHpBar();
         
         if (this.currentHp <= 0) {
-            this.gameOver('hp');
+            this.checkGameEnd();
         }
     }
 

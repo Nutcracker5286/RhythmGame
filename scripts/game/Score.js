@@ -10,9 +10,9 @@ class ScoreSystem {
             miss: 0
         };
         this.grades = {
-            perfect: { range: 0.05, score: 1000, text: '퍼펙트!' },
-            great: { range: 0.10, score: 800, text: '그레이트!' },
-            good: { range: 0.15, score: 500, text: '굿!' },
+            perfect: { range: 0.65, score: 1000, text: '퍼펙트!' },
+            great: { range: 0.9, score: 800, text: '그레이트!' },
+            good: { range: 1.1, score: 500, text: '굿!' },
             miss: { range: Infinity, score: 0, text: '미스' }
         };
         this.comboMultiplier = 0.01; // 콤보당 1% 추가 점수
@@ -33,29 +33,40 @@ class ScoreSystem {
         `;
     }
 
-    evaluateHit(timingDifference) {
-        let grade = 'miss';
+    evaluateHit(grade) {
+        let baseScore = 0;
+        let text = '';
         
-        for (const [gradeName, gradeData] of Object.entries(this.grades)) {
-            if (Math.abs(timingDifference) <= gradeData.range) {
-                grade = gradeName;
+        switch(grade) {
+            case 'perfect':
+                baseScore = 1000;
+                text = '퍼펙트!';
+                this.combo++;
                 break;
-            }
-        }
-
-        if (grade === 'miss') {
-            this.combo = 0;
-        } else {
-            this.combo++;
-            this.maxCombo = Math.max(this.maxCombo, this.combo);
+            case 'great':
+                baseScore = 800;
+                text = '그레이트!';
+                this.combo++;
+                break;
+            case 'good':
+                baseScore = 500;
+                text = '굿!';
+                this.combo++;
+                break;
+            case 'miss':
+                baseScore = 0;
+                text = '미스!';
+                this.combo = 0;
+                break;
         }
 
         this.hitResults[grade]++;
+        this.maxCombo = Math.max(this.maxCombo, this.combo);
         
-        const baseScore = this.grades[grade].score;
+        // 콤보 보너스 계산
         const comboBonus = Math.floor(baseScore * (this.combo * this.comboMultiplier));
         const finalScore = baseScore + comboBonus;
-
+        
         this.currentScore += finalScore;
         this.updateUI(grade, finalScore);
         
@@ -63,7 +74,7 @@ class ScoreSystem {
             grade,
             score: finalScore,
             combo: this.combo,
-            text: this.grades[grade].text
+            text: text
         };
     }
 
