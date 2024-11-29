@@ -27,9 +27,7 @@ class ScoreSystem {
         }
         
         scoreContainer.innerHTML = `
-            <div class="score-display">점수: ${this.currentScore}</div>
-            <div class="grade-display"></div>
-        `;
+            <div class="score-display">점수: ${this.currentScore}</div>`;
         
         // 콤보 표시 컨테이너가 없으면 생성
         if (!document.getElementById('comboDisplay')) {
