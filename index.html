@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/modal.css">
     <link rel="stylesheet" href="styles/themes.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 </head>
 <body>
     <div id="gameContainer">
@@ -44,6 +45,7 @@
     </div>
     <script src="scripts/ui/Settings.js"></script>
     <script src="scripts/ui/Theme.js"></script>
+    <script src="scripts/ui/BackgroundNotes.js"></script>
     <script>
         // 테마 초기화
         const theme = new Theme();
@@ -73,6 +75,7 @@
         // 초기 설정 로드
         document.addEventListener('DOMContentLoaded', function() {
             settings.loadCurrentSettings();
+            const backgroundNotes = new BackgroundNotes();
         });
     </script>
 </body>

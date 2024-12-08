@@ -295,3 +295,47 @@
     50% { transform: scale(1.2); }
     100% { transform: scale(1); }
 }
+
+.difficulty-stars {
+    font-size: 1.2em;
+    margin: 5px 0;
+    letter-spacing: 2px;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+}
+
+/* 난이도별 색상 */
+.difficulty-1 {
+    color: #4CAF50; /* 초록색 - 쉬움 */
+}
+
+.difficulty-2 {
+    color: #8BC34A; /* 연두색 - 약간 쉬움 */
+}
+
+.difficulty-3 {
+    color: #FFC107; /* 노란색 - 보통 */
+}
+
+.difficulty-4 {
+    color: #FF9800; /* 주황색 - 어려움 */
+}
+
+.difficulty-5 {
+    color: #F44336; /* 빨간색 - 매우 어려움 */
+    text-shadow: 0 0 8px rgba(244, 67, 54, 0.5);
+    animation: difficultyPulse 2s infinite;
+}
+
+/* 최고 난이도 반짝이는 효과 */
+@keyframes difficultyPulse {
+    0% { text-shadow: 0 0 8px rgba(244, 67, 54, 0.5); }
+    50% { text-shadow: 0 0 15px rgba(244, 67, 54, 0.8); }
+    100% { text-shadow: 0 0 8px rgba(244, 67, 54, 0.5); }
+}
+
+.song-info {
+    color: var(--text-color);
+    opacity: 0.8;
+    font-size: 0.9em;
+    margin: 5px 0;
+}

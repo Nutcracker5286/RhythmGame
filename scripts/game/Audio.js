@@ -9,14 +9,15 @@ class AudioManager {
     }
 
     setSongs(songList) {
-        // Convert SongManager's song list to AudioManager's format
+        // SongManager의 노래 목록을 AudioManager 형식으로 변환
         songList.forEach(song => {
             this.songs[song.id] = {
-                url: song.file,
+                url: song.url, // file 대신 url 사용
                 bpm: song.bpm,
                 difficulty: song.difficulty
             };
         });
+        console.log('Set songs:', this.songs); // 디버깅용
     }
     
     initAudioContext() {
@@ -50,11 +51,20 @@ class AudioManager {
         }
 
         try {
+            // SongManager에서 가져온 노래 정보를 사용
             const song = this.songs[songId];
-            if (!song) throw new Error('존재하지 않는 곡입니다.');
+            if (!song) {
+                console.error('노래 정보를 찾을 수 없습니다:', songId);
+                return false;
+            }
+
+            console.log('Loading song:', song); // 디버깅용
 
             const response = await fetch(song.url);
-            if (!response.ok) throw new Error('음원 로드 실패');
+            if (!response.ok) {
+                console.error('음원 파일을 찾을 수 없습니다:', song.url);
+                return false;
+            }
 
             const arrayBuffer = await response.arrayBuffer();
             const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
@@ -71,7 +81,6 @@ class AudioManager {
 
         } catch (error) {
             console.error('음원 로드 실패:', error);
-            alert('음원을 불러올 수 없습니다.');
             return false;
         }
     }

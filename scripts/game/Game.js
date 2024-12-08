@@ -46,6 +46,8 @@ class Game {
         // 콤보에 따른 HP 보정
         this.comboHpBonus = 0.1; // 10콤보당 HP 감소량 10% 감소
         this.maxComboBonus = 0.5; // 최대 50%까지 HP 감소량 감소
+
+        this.difficultySystem = new DifficultySystem();
     }
 
     resizeCanvas() {
@@ -55,46 +57,57 @@ class Game {
     }
 
     async startGame(songId) {
-        // 노래 데이터가 로드될 때까지 대기
-        if (!this.audioManager.songs[songId]) {
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-        
-        const loaded = await this.audioManager.loadSong(songId);
-        if (!loaded) {
-            console.error('Failed to load song');
-            return;
-        }
+        try {
+            // 노래 데이터 가져오기
+            const song = await this.songManager.getSong(songId);
+            if (!song) {
+                console.error('노래를 찾을 수 없습니다.');
+                return;
+            }
 
-        // currentSong 설정 수정
-        const songData = this.songManager.songs.find(song => song.id === songId);
-        this.currentSong = {
-            id: songId,
-            title: songData.title,
-            artist: songData.artist,
-            ...this.audioManager.songs[songId]
-        };
+            // AudioManager에 현재 노래 목록 업데이트
+            this.audioManager.setSongs([song]);
+            
+            // 오디오 로드
+            const loaded = await this.audioManager.loadSong(songId);
+            if (!loaded) {
+                console.error('Failed to load song');
+                return;
+            }
 
-        this.isPlaying = true;
-        this.score = 0;
-        this.currentHp = this.maxHp;
-        this.audioManager.play();
-        this.gameLoop();
+            // 현재 노래 정보 저장
+            this.currentSong = song;
+
+            // 난이도 설정 적용
+            const difficultySettings = this.difficultySystem.applyDifficultyToGame(this, song.difficulty);
+            
+            // 노트 생성 간격 설정
+            this.noteSpawnInterval = (60 / song.bpm) * 1000 * difficultySettings.beatMultiplier;
+            
+            // 게임 상태 초기화
+            this.resetGame();
+            
+            // 게임 시작
+            this.isPlaying = true;
+            this.audioManager.play();
+            this.gameLoop();
+
+        } catch (error) {
+            console.error('게임 시작 중 오류 발생:', error);
+        }
     }
 
     createCircle() {
+        // 난이도에 따른 노트 생성 확률 체크
+        if (Math.random() > this.noteFrequency) return;
+
         const canvas = document.getElementById('gameCanvas');
-        const difficulty = this.difficultySystem.getDifficultySettings(this.currentSong.difficulty);
+        const x = Math.random() * (canvas.width - 100) + 50;
+        const y = Math.random() * (canvas.height - 100) + 50;
+        const radius = 30;
         
-        // 난이도에 따른 노트 생성 간격 조절
-        const minSpacing = 100 * difficulty.noteSpacing;
-        const x = Math.random() * (canvas.width - minSpacing) + minSpacing/2;
-        const y = Math.random() * (canvas.height - minSpacing) + minSpacing/2;
-        
-        // 난이도에 따른 노트 존재 시간 조절
-        const lifetime = 2000 / difficulty.noteSpeed; // 기본 2초를 난이도로 나눔
-        
-        const circle = new Circle(x, y, 30, lifetime);
+        const circle = new Circle(x, y, radius);
+        circle.lifetime = this.noteLifetime || 2000; // 난이도별 노트 지속 시간 적용
         this.circles.push(circle);
     }
 
@@ -295,17 +308,16 @@ class Game {
 
         switch(judgement) {
             case 'miss':
-                hpChange = -this.hpDecreaseRate.miss * comboMultiplier;
+                hpChange = -(this.hpDrainRate * 2) * comboMultiplier; // 기본 drain의 2배
                 break;
             case 'good':
-                hpChange = this.hpDecreaseRate.good * comboMultiplier;
+                hpChange = this.hpDrainRate * 0.3 * comboMultiplier; // 30% 회복
                 break;
             case 'great':
-                hpChange = this.hpDecreaseRate.great;
+                hpChange = this.hpDrainRate * 0.5; // 50% 회복
                 break;
             case 'perfect':
-                // 콤보에 따라 회복량 증가 (기본 회복량은 미스 감소량의 20%)
-                hpChange = this.hpDecreaseRate.perfect * (1 + (this.scoreSystem.combo * 0.005)); // 콤보 보너스 감소 (0.01 -> 0.005)
+                hpChange = this.hpDrainRate * 0.8 * (1 + (this.scoreSystem.combo * 0.005));
                 break;
         }
 
@@ -398,5 +410,25 @@ class Game {
         setTimeout(() => {
             judgement.remove();
         }, 1000);
+    }
+
+    checkHit(x, y) {
+        // ... 기존 코드 ...
+        const timingDiff = circle.getTimingDifference();
+        
+        // 난이도에 따른 판정 범위 적용
+        if (timingDiff <= this.hitWindows.perfect) {
+            this.scoreSystem.addScore('perfect');
+            this.showJudgementText(x, y, '퍼펙트!');
+        } else if (timingDiff <= this.hitWindows.great) {
+            this.scoreSystem.addScore('great');
+            this.showJudgementText(x, y, '그레이트!');
+        } else if (timingDiff <= this.hitWindows.good) {
+            this.scoreSystem.addScore('good');
+            this.showJudgementText(x, y, '굿!');
+        } else {
+            this.scoreSystem.addScore('miss');
+            this.showJudgementText(x, y, '미스');
+        }
     }
 }
