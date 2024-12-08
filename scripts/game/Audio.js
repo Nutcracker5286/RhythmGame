@@ -4,12 +4,8 @@ class AudioManager {
         this.songs = {};
         this.currentSong = null;
         this.isPlaying = false;
-        this.beatInterval = null;
-        this.onBeat = null;
         this.audioSource = null;
         this.gainNode = null;
-        this.beatDetectionThreshold = 200;
-        this.lastBeatTime = 0;
     }
 
     setSongs(songList) {
@@ -71,7 +67,6 @@ class AudioManager {
                 startTime: 0
             };
 
-            this.beatInterval = (60 / song.bpm) * 1000;
             return true;
 
         } catch (error) {
@@ -93,7 +88,6 @@ class AudioManager {
             
             this.audioSource.start(0);
             this.isPlaying = true;
-            this.startBeatDetection();
 
         } catch (error) {
             console.error('재생 실패:', error);
@@ -113,7 +107,6 @@ class AudioManager {
         }
         this.isPlaying = false;
         this.currentSong = null;
-        this.lastBeatTime = 0;
     }
 
     pause() {
@@ -142,11 +135,6 @@ class AudioManager {
 
     setOnBeatCallback(callback) {
         this.onBeat = callback;
-    }
-
-    startBeatDetection() {
-        // 예시: 비트 감지 로직을 여기에 추가
-        // this.onBeat(); // 비트가 감지될 때 호출
     }
 
     stop() {

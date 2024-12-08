@@ -84,11 +84,17 @@ class Game {
 
     createCircle() {
         const canvas = document.getElementById('gameCanvas');
-        const x = Math.random() * (canvas.width - 100) + 50;
-        const y = Math.random() * (canvas.height - 100) + 50;
-        const radius = 30;
+        const difficulty = this.difficultySystem.getDifficultySettings(this.currentSong.difficulty);
         
-        const circle = new Circle(x, y, radius);
+        // 난이도에 따른 노트 생성 간격 조절
+        const minSpacing = 100 * difficulty.noteSpacing;
+        const x = Math.random() * (canvas.width - minSpacing) + minSpacing/2;
+        const y = Math.random() * (canvas.height - minSpacing) + minSpacing/2;
+        
+        // 난이도에 따른 노트 존재 시간 조절
+        const lifetime = 2000 / difficulty.noteSpeed; // 기본 2초를 난이도로 나눔
+        
+        const circle = new Circle(x, y, 30, lifetime);
         this.circles.push(circle);
     }
 
@@ -167,18 +173,6 @@ class Game {
                 particles.forEach(particle => particle.remove());
             }
         });
-    }
-
-    adjustColor(color, amount) {
-        const hex = color.replace('#', '');
-        const r = Math.min(255, Math.max(0, parseInt(hex.substring(0, 2), 16) + amount));
-        const g = Math.min(255, Math.max(0, parseInt(hex.substring(2, 4), 16) + amount));
-        const b = Math.min(255, Math.max(0, parseInt(hex.substring(4, 6), 16) + amount));
-        
-        return `#${[r, g, b].map(x => {
-            const hex = x.toString(16);
-            return hex.length === 1 ? '0' + hex : hex;
-        }).join('')}`;
     }
 
     updateScore(newScore) {
