@@ -53,7 +53,7 @@ class SongManager {
                     bpm: 120,
                     difficulty: 2,
                     duration: '3:24',
-                    url: '../../music/James Mercy, PhiloSofie - Take You On [NCS Release].mp3'
+                    url: '../music/James Mercy, PhiloSofie - Take You On [NCS Release].mp3'
                 },
                 {
                     id: 'song2',
@@ -62,7 +62,7 @@ class SongManager {
                     bpm: 130,
                     difficulty: 3,
                     duration: '3:32',
-                    url: '../../music/Maestro Chives, Egzod, Neoni - Royalty [NCS Release].mp3'
+                    url: '../music/Maestro Chives, Egzod, Neoni - Royalty [NCS Release].mp3'
                 },
                 {
                     id: 'song3',
@@ -71,7 +71,7 @@ class SongManager {
                     bpm: 140,
                     difficulty: 4,
                     duration: '2:56',
-                    url: '../../music/Neoni, Arcando, Besomorph - Army [NCS Release].mp3'
+                    url: '../music/Neoni, Arcando, Besomorph - Army [NCS Release].mp3'
                 },
                 {
                     id: 'song4',
@@ -80,7 +80,7 @@ class SongManager {
                     bpm: 150,
                     difficulty: 3,
                     duration: '3:42',
-                    url: '../../music/ROY KNOX - Your Poison [NCS Release].mp3'
+                    url: '../music/ROY KNOX - Your Poison [NCS Release].mp3'
                 },
                 {
                     id: 'song5',
@@ -89,7 +89,7 @@ class SongManager {
                     bpm: 160,
                     difficulty: 4,
                     duration: '3:14',
-                    url: '../../music/TULE, Chris Linton - Fearless pt. II (feat. Chris Linton) [NCS Release].mp3'
+                    url: '../music/TULE, Chris Linton - Fearless pt. II (feat. Chris Linton) [NCS Release].mp3'
                 },
                 {
                     id: 'song6',
@@ -98,7 +98,7 @@ class SongManager {
                     bpm: 170,
                     difficulty: 5,
                     duration: '3:48',
-                    url: '../../music/Warriyo, Laura Brehm - Mortals (feat. Laura Brehm) [NCS Release].mp3'
+                    url: '../music/Warriyo, Laura Brehm - Mortals (feat. Laura Brehm) [NCS Release].mp3'
                 }
             ];
             return this.songs;
